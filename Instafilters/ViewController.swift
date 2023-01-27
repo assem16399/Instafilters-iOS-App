@@ -9,13 +9,13 @@ import CoreImage
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet weak var filterSlider: UISlider!
     
     @IBOutlet weak var imageView: UIImageView!
     
     var currentSelectedImage:UIImage!
-  
+    
     var context: CIContext!
     var currentFilter: CIFilter!
     
@@ -26,7 +26,7 @@ class ViewController: UIViewController {
         context = CIContext()
         currentFilter = CIFilter(name: "CISepiaTone")
     }
-
+    
     @IBAction func onChangeFilterPressed(_ sender: UIButton) {
         let ac = UIAlertController(title: "Filters", message: "Select a filter to apply", preferredStyle: .actionSheet)
         ac.addAction(UIAlertAction(title: "CIBumpDistortion", style: .default, handler: setFilter))
@@ -38,10 +38,10 @@ class ViewController: UIViewController {
         ac.addAction(UIAlertAction(title: "CIVignette", style: .default, handler: setFilter))
         ac.popoverPresentationController?.sourceView = sender
         ac.popoverPresentationController?.sourceRect = sender.bounds
-
+        
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(ac, animated: true)
-
+        
     }
     
     func setFilter(action:UIAlertAction) {
@@ -57,6 +57,8 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onSavePressed(_ sender: UIButton) {
+        guard let img = imageView.image else {return}
+        UIImageWriteToSavedPhotosAlbum(img, self, #selector(image(_: didFinishSavingWithError: contextInfo:)), nil)
     }
     
     @IBAction func onSliderValueChanged(_ sender: UISlider) {
@@ -86,10 +88,22 @@ class ViewController: UIViewController {
         if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(filterSlider.value * 10, forKey: kCIInputScaleKey) }
         if inputKeys.contains(kCIInputCenterKey) { currentFilter.setValue(CIVector(x: currentSelectedImage.size.width / 2, y: currentSelectedImage.size.height / 2), forKey: kCIInputCenterKey) }
         guard let outputImg = currentFilter.outputImage else {return}
-
+        
         if let cgImg = context.createCGImage(outputImg, from: outputImg.extent) {
             let image = UIImage(cgImage: cgImg)
             self.imageView.image = image
+        }
+    }
+    
+    @objc func image(_ image:UIImage,didFinishSavingWithError error:Error?,contextInfo:UnsafeRawPointer) {
+        if let error {
+            let ac = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+        }else{
+            let ac = UIAlertController(title: "Saved", message: "Picture saved successfully", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
         }
     }
 }
