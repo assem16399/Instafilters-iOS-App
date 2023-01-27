@@ -10,10 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var filterSlider: UISlider!
+    @IBOutlet weak var intensitySlider: UISlider!
     
     @IBOutlet weak var imageView: UIImageView!
     
+    @IBOutlet weak var radiusSlider: UISlider!
     var currentSelectedImage:UIImage!
     
     var context: CIContext!
@@ -68,7 +69,7 @@ class ViewController: UIViewController {
         UIImageWriteToSavedPhotosAlbum(img, self, #selector(image(_: didFinishSavingWithError: contextInfo:)), nil)
     }
     
-    @IBAction func onSliderValueChanged(_ sender: UISlider) {
+    @IBAction func onIntesityValueChanged(_ sender: UISlider) {
         applyProcessing()
     }
     
@@ -76,6 +77,11 @@ class ViewController: UIViewController {
     func configureNavBar() {
         title = currentFilter.name
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(onAddImagePressed))
+    }
+    
+    
+    @IBAction func onRadiusChanged(_ sender: UISlider) {
+        applyProcessing()
     }
     
     @objc func onAddImagePressed(){
@@ -87,12 +93,14 @@ class ViewController: UIViewController {
     }
     
     func applyProcessing() {
+        
+        guard let currentSelectedImage else { return }
         let inputKeys = currentFilter.inputKeys
         
         
-        if inputKeys.contains(kCIInputIntensityKey) { currentFilter.setValue(filterSlider.value, forKey: kCIInputIntensityKey) }
-        if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(filterSlider.value * 200, forKey: kCIInputRadiusKey) }
-        if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(filterSlider.value * 10, forKey: kCIInputScaleKey) }
+        if inputKeys.contains(kCIInputIntensityKey) { currentFilter.setValue(intensitySlider.value, forKey: kCIInputIntensityKey) }
+        if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(intensitySlider.value * radiusSlider.value * 1000, forKey: kCIInputRadiusKey) }
+        if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue(intensitySlider.value * 10, forKey: kCIInputScaleKey) }
         if inputKeys.contains(kCIInputCenterKey) { currentFilter.setValue(CIVector(x: currentSelectedImage.size.width / 2, y: currentSelectedImage.size.height / 2), forKey: kCIInputCenterKey) }
         guard let outputImg = currentFilter.outputImage else {return}
         
