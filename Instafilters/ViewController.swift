@@ -22,9 +22,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        configureNavBar()
         context = CIContext()
         currentFilter = CIFilter(name: "CISepiaTone")
+        configureNavBar()
     }
     
     @IBAction func onChangeFilterPressed(_ sender: UIButton) {
@@ -50,6 +50,7 @@ class ViewController: UIViewController {
             return
         }
         currentFilter = CIFilter(name:filterName)
+        title = currentFilter.name
         guard let currentSelectedImage else {return}
         currentFilter.setValue(CIImage(image: currentSelectedImage), forKey: kCIInputImageKey)
         applyProcessing()
@@ -57,7 +58,13 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onSavePressed(_ sender: UIButton) {
-        guard let img = imageView.image else {return}
+        guard let img = imageView.image else {
+            
+            let ac = UIAlertController(title: "No Photo", message: "Please select a photo to save", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Okay", style: .default))
+            present(ac, animated: true)
+            return
+        }
         UIImageWriteToSavedPhotosAlbum(img, self, #selector(image(_: didFinishSavingWithError: contextInfo:)), nil)
     }
     
@@ -67,7 +74,7 @@ class ViewController: UIViewController {
     
     
     func configureNavBar() {
-        title = "Instafilter"
+        title = currentFilter.name
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(onAddImagePressed))
     }
     
