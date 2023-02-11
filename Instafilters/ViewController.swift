@@ -134,7 +134,13 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         
         let beginImage = CIImage(image: currentSelectedImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
+        handleImageFadingAnimation()
         applyProcessing()
+    }
+    
+    private func handleImageFadingAnimation() {
+        imageView.alpha = 0.0
+        UIView.animate(withDuration: 1, delay: 0){self.imageView.alpha = 1.0}
     }
     
     func getDocDirPath() -> URL {
